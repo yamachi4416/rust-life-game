@@ -1,39 +1,48 @@
-use std::{
-    io::{self},
-    sync::mpsc::{self},
-    thread,
-    time::Duration,
-};
+use std::{error::Error, time::Duration};
 
-use crossterm::{
-    cursor,
-    event::{self, Event, KeyCode},
-    queue,
-    style::{self, Stylize},
-    terminal::{self},
-};
+use crossterm::event;
 
+use ratatui::{
+    layout,
+    style::Color,
+    widgets::{
+        canvas::{Canvas, Points},
+        Block, BorderType,
+    },
+    DefaultTerminal, Frame,
+};
 use rust_life_game::LifeGame;
 
-fn main() -> io::Result<()> {
-    let mut stdout = io::stdout();
-    let tick = ticker();
+fn main() -> Result<(), Box<dyn Error>> {
+    let mut terminal = ratatui::init();
+    let result = run(&mut terminal);
+    ratatui::restore();
+    result
+}
 
+fn run(terminal: &mut DefaultTerminal) -> Result<(), Box<dyn Error>> {
     loop {
         for (name, input) in inputs() {
-            let mut life_game: LifeGame = LifeGame::from(input);
+            let mut game = LifeGame::from(input);
 
             loop {
-                queue!(
-                    stdout,
-                    terminal::Clear(terminal::ClearType::All),
-                    cursor::MoveTo(0, 0),
-                    style::PrintStyledContent(name.clone().magenta()),
-                    cursor::MoveTo(0, 1),
-                    style::Print(life_game.to_string()),
-                )?;
+                terminal.draw(|frame| draw(&name, &game, frame))?;
 
-                if tick().is_none() || life_game.next().is_none() {
+                if event::poll(Duration::from_millis(1000))? {
+                    if let event::Event::Key(key) = event::read()? {
+                        match key.code {
+                            event::KeyCode::Enter => {
+                                break;
+                            }
+                            event::KeyCode::Char('q') => {
+                                return Ok(());
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+
+                if let None = game.next() {
                     break;
                 }
             }
@@ -41,29 +50,42 @@ fn main() -> io::Result<()> {
     }
 }
 
-fn ticker() -> impl Fn() -> Option<()> {
-    let (tx, rx) = mpsc::channel();
+fn draw(name: &str, game: &LifeGame, frame: &mut Frame) {
+    let area = layout::Rect::new(0, 0, game.width as u16, game.height as u16);
 
-    thread::spawn(move || -> io::Result<()> {
-        loop {
-            match event::read()? {
-                Event::Key(event) => {
-                    tx.send(event.code).unwrap();
-                }
-                _ => {}
-            }
-        }
-    });
+    let canvas = Canvas::default()
+        .block(
+            Block::bordered()
+                .border_type(BorderType::Rounded)
+                .title(name)
+                .title_alignment(layout::Alignment::Center),
+        )
+        .marker(ratatui::symbols::Marker::Dot)
+        .x_bounds([0.0, f64::from(area.width)])
+        .y_bounds([0.0, f64::from(area.height)])
+        .paint(|ctx| {
+            ctx.draw(&Points {
+                coords: &game
+                    .get_cells()
+                    .iter()
+                    .enumerate()
+                    .flat_map(|(y, rows)| {
+                        rows.iter()
+                            .enumerate()
+                            .filter(|(_, &c)| c)
+                            .map(move |(x, _)| {
+                                (
+                                    x as f64 - f64::from(area.left()) + 1.0,
+                                    f64::from(area.bottom()) - y as f64 - 1.0,
+                                )
+                            })
+                    })
+                    .collect::<Vec<_>>(),
+                color: Color::White,
+            });
+        });
 
-    move || -> Option<()> {
-        for _ in 0..1000 {
-            thread::sleep(Duration::from_millis(1));
-            if let Ok(KeyCode::Enter) = rx.try_recv() {
-                return None;
-            }
-        }
-        Some(())
-    }
+    frame.render_widget(canvas, area);
 }
 
 fn inputs() -> Vec<(String, Vec<Vec<u8>>)> {

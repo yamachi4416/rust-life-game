@@ -7,8 +7,8 @@ const LIVE: Value = 1;
 const DEAD: Value = 0;
 
 pub struct LifeGame {
-    width: usize,
-    height: usize,
+    pub width: usize,
+    pub height: usize,
     cells: Cells,
 }
 
@@ -53,6 +53,13 @@ impl LifeGame {
         for &(x, y) in points {
             self.cells[y][x] = LIVE;
         }
+    }
+
+    pub fn get_cells(&self) -> Vec<Vec<bool>> {
+        self.cells
+            .iter()
+            .map(|row| row.iter().map(|&c| c == LIVE).collect())
+            .collect()
     }
 
     pub fn next(&mut self) -> Option<()> {
