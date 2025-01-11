@@ -68,19 +68,15 @@ fn draw(name: &str, game: &LifeGame, frame: &mut Frame) {
         .paint(|ctx| {
             ctx.draw(&Points {
                 coords: &game
-                    .get_cells()
-                    .iter()
+                    .cells_iter()
                     .enumerate()
                     .flat_map(|(y, rows)| {
-                        rows.iter()
-                            .enumerate()
-                            .filter(|(_, &c)| c)
-                            .map(move |(x, _)| {
-                                (
-                                    x as f64 - f64::from(area.left()) + 1.0,
-                                    f64::from(area.bottom()) - y as f64 - 1.0,
-                                )
-                            })
+                        rows.enumerate().filter(|(_, c)| *c).map(move |(x, _)| {
+                            (
+                                x as f64 - f64::from(area.left()) + 1.0,
+                                f64::from(area.bottom()) - y as f64 - 1.0,
+                            )
+                        })
                     })
                     .collect::<Vec<_>>(),
                 color: Color::White,

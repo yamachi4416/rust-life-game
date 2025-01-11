@@ -55,11 +55,8 @@ impl LifeGame {
         }
     }
 
-    pub fn get_cells(&self) -> Vec<Vec<bool>> {
-        self.cells
-            .iter()
-            .map(|row| row.iter().map(|&c| c == LIVE).collect())
-            .collect()
+    pub fn cells_iter(&self) -> impl Iterator<Item = impl Iterator<Item = bool> + '_> + '_ {
+        self.cells.iter().map(|row| row.iter().map(|&c| c == LIVE))
     }
 
     pub fn next(&mut self) -> Option<()> {
