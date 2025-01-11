@@ -3,12 +3,10 @@ use std::{error::Error, time::Duration};
 use crossterm::event;
 
 use ratatui::{
-    layout,
-    style::Color,
-    widgets::{
-        canvas::{Canvas, Points},
-        Block, BorderType,
-    },
+    layout::Rect,
+    style::{Color, Style, Stylize},
+    text::Text,
+    widgets::Block,
     DefaultTerminal, Frame,
 };
 use rust_life_game::LifeGame;
@@ -53,37 +51,38 @@ fn run(terminal: &mut DefaultTerminal) -> Result<(), Box<dyn Error>> {
 }
 
 fn draw(name: &str, game: &LifeGame, frame: &mut Frame) {
-    let area = layout::Rect::new(0, 0, game.width as u16, game.height as u16);
+    let title = Text::from_iter([name]).bg(Color::Blue).fg(Color::White);
+    let title_height = title.height() as u16;
 
-    let canvas = Canvas::default()
-        .block(
-            Block::bordered()
-                .border_type(BorderType::Rounded)
-                .title(name)
-                .title_alignment(layout::Alignment::Center),
-        )
-        .marker(ratatui::symbols::Marker::Dot)
-        .x_bounds([0.0, f64::from(area.width)])
-        .y_bounds([0.0, f64::from(area.height)])
-        .paint(|ctx| {
-            ctx.draw(&Points {
-                coords: &game
-                    .cells_iter()
-                    .enumerate()
-                    .flat_map(|(y, rows)| {
-                        rows.enumerate().filter(|(_, c)| *c).map(move |(x, _)| {
-                            (
-                                x as f64 - f64::from(area.left()) + 1.0,
-                                f64::from(area.bottom()) - y as f64 - 1.0,
-                            )
-                        })
-                    })
-                    .collect::<Vec<_>>(),
-                color: Color::White,
-            });
-        });
+    let width = 2;
+    let height = 1;
 
-    frame.render_widget(canvas, area);
+    let style_live = Style::default().bg(Color::LightBlue);
+    let style_dead = Style::default().bg(Color::White);
+
+    frame.render_widget(
+        title.centered(),
+        Rect {
+            x: 0,
+            y: 0,
+            width: game.width as u16 * width,
+            height: title_height,
+        },
+    );
+
+    for (y, rows) in game.cells_iter().enumerate() {
+        for (x, col) in rows.enumerate() {
+            frame.render_widget(
+                Block::default().style(if col { style_live } else { style_dead }),
+                Rect {
+                    x: x as u16 * width,
+                    y: y as u16 * height + title_height,
+                    height,
+                    width,
+                },
+            );
+        }
+    }
 }
 
 fn inputs() -> Vec<(String, Vec<Vec<u8>>)> {
