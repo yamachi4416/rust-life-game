@@ -80,17 +80,19 @@ fn run(terminal: &mut DefaultTerminal) -> Result<(), Box<dyn Error>> {
 
 fn draw(name: &str, game: &LifeGame, setting: &Setting, frame: &mut Frame) {
     let color = Color::Indexed(setting.color);
-    let title = Text::from_iter([name]).bg(color).fg(Color::White);
+
+    let style_title = Style::default().bg(color).bold();
+    let style_live = Style::default().bg(color);
+    let style_dead = Style::default().bg(Color::White);
+
+    let title = Text::from_iter([name]).style(style_title);
     let title_height = title.height() as u16;
 
     let width = setting.size * 2;
     let height = setting.size;
 
-    let style_live = Style::default().bg(color);
-    let style_dead = Style::default().bg(Color::White);
-
     frame.render_widget(
-        title.centered().bold(),
+        title.centered(),
         Rect {
             x: 0,
             y: 0,
@@ -100,12 +102,14 @@ fn draw(name: &str, game: &LifeGame, setting: &Setting, frame: &mut Frame) {
     );
 
     for (y, rows) in game.cells_iter().enumerate() {
+        let y = y as u16 * height + title_height;
+
         for (x, col) in rows.enumerate() {
             frame.render_widget(
                 Block::default().style(if col { style_live } else { style_dead }),
                 Rect {
                     x: x as u16 * width,
-                    y: y as u16 * height + title_height,
+                    y,
                     height,
                     width,
                 },
