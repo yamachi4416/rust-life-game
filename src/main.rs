@@ -18,7 +18,23 @@ fn main() -> Result<(), Box<dyn Error>> {
     result
 }
 
+struct Setting {
+    size: u16,
+    color: u8,
+}
+
+impl Setting {
+    fn add_size(&mut self, delta: i16) {
+        self.size = (self.size as i32 + delta as i32).clamp(1, 10) as u16;
+    }
+
+    fn next_color(&mut self) {
+        self.color = (self.color + 1) % 16;
+    }
+}
+
 fn run(terminal: &mut DefaultTerminal) -> Result<(), Box<dyn Error>> {
+    let mut setting = Setting { size: 1, color: 0 };
     let inputs = inputs();
 
     loop {
@@ -26,13 +42,25 @@ fn run(terminal: &mut DefaultTerminal) -> Result<(), Box<dyn Error>> {
             let mut game = LifeGame::from(input);
 
             loop {
-                terminal.draw(|frame| draw(&name, &game, frame))?;
+                terminal.draw(|frame| draw(&name, &game, &setting, frame))?;
 
-                if event::poll(Duration::from_millis(1000))? {
+                if event::poll(Duration::from_secs(1))? {
                     if let event::Event::Key(key) = event::read()? {
                         match key.code {
-                            event::KeyCode::Enter => {
+                            event::KeyCode::Char('n') => {
                                 break;
+                            }
+                            event::KeyCode::Char('+') => {
+                                setting.add_size(1);
+                                continue;
+                            }
+                            event::KeyCode::Char('-') => {
+                                setting.add_size(-1);
+                                continue;
+                            }
+                            event::KeyCode::Char('c') => {
+                                setting.next_color();
+                                continue;
                             }
                             event::KeyCode::Char('q') => {
                                 return Ok(());
@@ -50,18 +78,19 @@ fn run(terminal: &mut DefaultTerminal) -> Result<(), Box<dyn Error>> {
     }
 }
 
-fn draw(name: &str, game: &LifeGame, frame: &mut Frame) {
-    let title = Text::from_iter([name]).bg(Color::Blue).fg(Color::White);
+fn draw(name: &str, game: &LifeGame, setting: &Setting, frame: &mut Frame) {
+    let color = Color::Indexed(setting.color);
+    let title = Text::from_iter([name]).bg(color).fg(Color::White);
     let title_height = title.height() as u16;
 
-    let width = 2;
-    let height = 1;
+    let width = setting.size * 2;
+    let height = setting.size;
 
-    let style_live = Style::default().bg(Color::LightBlue);
+    let style_live = Style::default().bg(color);
     let style_dead = Style::default().bg(Color::White);
 
     frame.render_widget(
-        title.centered(),
+        title.centered().bold(),
         Rect {
             x: 0,
             y: 0,
