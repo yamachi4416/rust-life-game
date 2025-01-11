@@ -21,8 +21,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn run(terminal: &mut DefaultTerminal) -> Result<(), Box<dyn Error>> {
+    let inputs = inputs();
+
     loop {
-        for (name, input) in inputs() {
+        for (name, input) in inputs.iter() {
             let mut game = LifeGame::from(input);
 
             loop {

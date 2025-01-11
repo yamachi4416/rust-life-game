@@ -35,7 +35,7 @@ impl LifeGame {
         }
     }
 
-    pub fn from(input: Vec<Vec<Value>>) -> Self {
+    pub fn from(input: &[Vec<Value>]) -> Self {
         let height = input.len();
         let width = input.iter().map(|row| row.len()).min().unwrap();
         let cells = input
