@@ -7,8 +7,9 @@ const LIVE: Value = 1;
 const DEAD: Value = 0;
 
 pub struct LifeGame {
-    pub width: usize,
-    pub height: usize,
+    name: String,
+    width: usize,
+    height: usize,
     cells: Cells,
 }
 
@@ -27,6 +28,7 @@ impl Display for LifeGame {
 impl LifeGame {
     pub fn new(width: usize, height: usize) -> Self {
         LifeGame {
+            name: String::new(),
             width,
             height,
             cells: (0..height)
@@ -35,7 +37,7 @@ impl LifeGame {
         }
     }
 
-    pub fn from(input: &[Vec<Value>]) -> Self {
+    pub fn from(name: &str, input: &[Vec<Value>]) -> Self {
         let height = input.len();
         let width = input.iter().map(|row| row.len()).min().unwrap();
         let cells = input
@@ -43,6 +45,7 @@ impl LifeGame {
             .map(|row| row.iter().take(width).map(|&cell| cell).collect())
             .collect();
         LifeGame {
+            name: name.into(),
             width,
             height,
             cells,
@@ -69,6 +72,18 @@ impl LifeGame {
         } else {
             Some(())
         }
+    }
+
+    pub fn name(&self) -> &str {
+        self.name.as_ref()
+    }
+
+    pub fn width(&self) -> u16 {
+        self.width as u16
+    }
+
+    pub fn height(&self) -> u16 {
+        self.height as u16
     }
 
     fn to_next_generation_cells(&self) -> Cells {
