@@ -33,19 +33,25 @@ impl Setting {
     }
 
     fn add_size(&mut self, delta: i16) {
-        self.size = (self.size as i32 + delta as i32).clamp(1, 10) as u16;
+        if let Some(delta) = self.size.checked_add_signed(delta) {
+            self.size = delta.clamp(1, 10);
+        }
+    }
+
+    fn move_x(&mut self, x: i16) {
+        if let Some(x) = self.x.checked_add_signed(x) {
+            self.x = x.clamp(0, 100);
+        }
+    }
+
+    fn move_y(&mut self, y: i16) {
+        if let Some(y) = self.y.checked_add_signed(y) {
+            self.y = y.clamp(0, 100);
+        }
     }
 
     fn next_color(&mut self) {
         self.color = (self.color + 1) % 16;
-    }
-
-    fn move_x(&mut self, x: i16) {
-        self.x = (self.x as i32 + x as i32).clamp(0, 100) as u16;
-    }
-
-    fn move_y(&mut self, y: i16) {
-        self.y = (self.y as i32 + y as i32).clamp(0, 100) as u16;
     }
 }
 
@@ -81,11 +87,12 @@ impl<'a> App<'a> {
             loop {
                 terminal.draw(|frame| self.draw(frame))?;
 
-                if event::poll(
-                    self.setting
-                        .tick_rate
-                        .saturating_sub(self.last_tick.elapsed()),
-                )? {
+                let timeout = self
+                    .setting
+                    .tick_rate
+                    .saturating_sub(self.last_tick.elapsed());
+
+                if event::poll(timeout)? {
                     if let Event::Key(key) = event::read()? {
                         match self.handle_key_event(key) {
                             HandleResult::Quit => return Ok(()),
@@ -143,7 +150,7 @@ impl<'a> App<'a> {
         let style_live = Style::default().bg(color);
         let style_dead = Style::default().bg(Color::White);
 
-        let title = Text::from_iter([game.name()]).style(style_title);
+        let title = Text::from(game.name()).style(style_title);
         let title_height = title.height() as u16;
 
         let width = self.setting.size * 2;
