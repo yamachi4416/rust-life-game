@@ -3,7 +3,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use crossterm::event::{self, Event, KeyCode, KeyEvent};
+use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
     layout::Rect,
     style::{Color, Style, Stylize},
@@ -118,25 +118,27 @@ impl<'a> App<'a> {
     }
 
     fn handle_key_event(&mut self, key: KeyEvent) -> HandleResult {
-        match key.code {
-            KeyCode::Char('q') => return HandleResult::Quit,
-            KeyCode::Char('n') => {
-                self.last_tick = Instant::now();
-                return HandleResult::Next;
-            }
-            KeyCode::Char('+') => self.setting.add_size(1),
-            KeyCode::Char('-') => self.setting.add_size(-1),
-            KeyCode::Char('c') => self.setting.next_color(),
-            KeyCode::Right | KeyCode::Char('l') => self.setting.move_x(1),
-            KeyCode::Left | KeyCode::Char('h') => self.setting.move_x(-1),
-            KeyCode::Down | KeyCode::Char('j') => self.setting.move_y(1),
-            KeyCode::Up | KeyCode::Char('k') => self.setting.move_y(-1),
-            KeyCode::Char(' ') => {
-                if let Some(last_tick) = self.last_tick.checked_sub(self.setting.tick_rate) {
-                    self.last_tick = last_tick
+        if key.kind != KeyEventKind::Release {
+            match key.code {
+                KeyCode::Char('q') => return HandleResult::Quit,
+                KeyCode::Char('n') => {
+                    self.last_tick = Instant::now();
+                    return HandleResult::Next;
                 }
+                KeyCode::Char('+') => self.setting.add_size(1),
+                KeyCode::Char('-') => self.setting.add_size(-1),
+                KeyCode::Char('c') => self.setting.next_color(),
+                KeyCode::Right | KeyCode::Char('l') => self.setting.move_x(1),
+                KeyCode::Left | KeyCode::Char('h') => self.setting.move_x(-1),
+                KeyCode::Down | KeyCode::Char('j') => self.setting.move_y(1),
+                KeyCode::Up | KeyCode::Char('k') => self.setting.move_y(-1),
+                KeyCode::Char(' ') => {
+                    if let Some(last_tick) = self.last_tick.checked_sub(self.setting.tick_rate) {
+                        self.last_tick = last_tick
+                    }
+                }
+                _ => {}
             }
-            _ => {}
         }
         HandleResult::Keep
     }
