@@ -39,11 +39,8 @@ impl LifeGame {
 
     pub fn from(name: &str, input: &[Vec<Value>]) -> Self {
         let height = input.len();
-        let width = input.iter().map(|row| row.len()).min().unwrap();
-        let cells = input
-            .iter()
-            .map(|row| row.iter().take(width).map(|&cell| cell).collect())
-            .collect();
+        let width = input.iter().map(Vec::len).min().unwrap();
+        let cells = input.iter().map(|row| row[..width].to_vec()).collect();
         LifeGame {
             name: name.into(),
             width,
@@ -63,13 +60,11 @@ impl LifeGame {
     }
 
     pub fn next(&mut self) -> Option<()> {
-        let prev = &self.cells;
-        let next = self.to_next_generation_cells();
-        let same = Self::is_same_cells(prev, &next);
-        self.cells = next;
-        if same {
+        let next = self.to_next_cells();
+        if self.cells == next {
             None
         } else {
+            self.cells = next;
             Some(())
         }
     }
@@ -86,7 +81,7 @@ impl LifeGame {
         self.height as u16
     }
 
-    fn to_next_generation_cells(&self) -> Cells {
+    fn to_next_cells(&self) -> Cells {
         self.cells
             .iter()
             .enumerate()
@@ -106,19 +101,12 @@ impl LifeGame {
         }
     }
 
-    fn count_alives(&self, x: usize, y: usize) -> u8 {
+    fn count_alives(&self, x: usize, y: usize) -> usize {
         let ys = if y == 0 { 0 } else { y - 1 }..=cmp::min(y + 1, self.height - 1);
         let xs = if x == 0 { 0 } else { x - 1 }..=cmp::min(x + 1, self.width - 1);
         ys.flat_map(|y| xs.clone().map(move |x| (x, y)))
             .filter(|&p| p != (x, y))
-            .map(|(x, y)| if self.cells[y][x] == LIVE { 1 } else { 0 })
-            .sum()
-    }
-
-    fn is_same_cells(a: &Cells, b: &Cells) -> bool {
-        a.len() == b.len()
-            && a.iter()
-                .zip(b)
-                .all(|(r1, r2)| r1.len() == r2.len() && r1.iter().zip(r2).all(|(c1, c2)| c1 == c2))
+            .filter(|&(x, y)| self.cells[y][x] == LIVE)
+            .count()
     }
 }
