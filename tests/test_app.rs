@@ -66,10 +66,7 @@ impl Command {
     }
 
     pub fn press(&mut self, c: char) -> String {
-        let mut buf = [0u8; 4];
-        self.writer
-            .write_all(c.encode_utf8(&mut buf).as_bytes())
-            .unwrap();
+        write!(self.writer, "{c}").unwrap();
         self.writer.flush().unwrap();
         sleep(Duration::from_millis(50));
         self.frame()
