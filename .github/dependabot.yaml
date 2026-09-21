@@ -12,6 +12,9 @@ updates:
         dependency-type: "production"
       rust-development:
         dependency-type: "development"
+    ignore:
+      - dependency-name: "portable-pty"
+        versions: [">= 0.9.0"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
