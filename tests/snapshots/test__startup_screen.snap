@@ -1,0 +1,13 @@
+---
+source: tests/test.rs
+expression: app.frame()
+---
+0000OCTAGON00000                                                                
+      0000                                                                      
+    00    00                                                                    
+  00        00                                                                  
+00            00                                                                
+00            00                                                                
+  00        00                                                                  
+    00    00                                                                    
+      0000

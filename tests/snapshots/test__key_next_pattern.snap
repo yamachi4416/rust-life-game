@@ -1,0 +1,8 @@
+---
+source: tests/test.rs
+expression: "app.press('n')"
+---
+000000000GLIDER000000000                                                        
+    00                                                                          
+00  00                                                                          
+  0000

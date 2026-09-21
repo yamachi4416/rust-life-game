@@ -1,0 +1,13 @@
+---
+source: tests/test.rs
+expression: "app.press('c')"
+---
+2222OCTAGON22222                                                                
+      2222                                                                      
+    22    22                                                                    
+  22        22                                                                  
+22            22                                                                
+22            22                                                                
+  22        22                                                                  
+    22    22                                                                    
+      2222
