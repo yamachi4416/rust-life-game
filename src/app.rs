@@ -6,7 +6,7 @@ use std::{
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
     layout::Rect,
-    style::{Color, Style, Stylize},
+    style::{Color, Style},
     text::Text,
     widgets::Block,
     DefaultTerminal, Frame,
