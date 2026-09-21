@@ -52,7 +52,7 @@ impl Command {
         for r in 0..rows {
             for c in 0..cols {
                 let cell = screen.cell(r, c).unwrap();
-                out.push_str(&match cell.contents().as_str() {
+                out.push_str(&match cell.contents() {
                     "" | " " => match cell.bgcolor() {
                         vt100::Color::Idx(n) if n != 15 => format!("{n:x}"),
                         _ => " ".into(),

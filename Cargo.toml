@@ -10,4 +10,4 @@ ratatui = "0.30.2"
 [dev-dependencies]
 insta = "1.48"
 portable-pty = "0.8"
-vt100 = "0.15"
+vt100 = "0.16"
