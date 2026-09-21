@@ -59,7 +59,7 @@ impl LifeGame {
         self.cells.iter().map(|row| row.iter().map(|&c| c == LIVE))
     }
 
-    pub fn next(&mut self) -> Option<()> {
+    pub fn step(&mut self) -> Option<()> {
         let next = self.to_next_cells();
         if self.cells == next {
             None

@@ -102,14 +102,11 @@ impl<'a> App<'a> {
                     }
                 }
 
-                if self.last_tick.elapsed() < self.setting.tick_rate {
-                    continue;
-                }
-
-                self.last_tick = Instant::now();
-
-                if let None = self.life_game.next() {
-                    break;
+                if self.last_tick.elapsed() >= self.setting.tick_rate {
+                    self.last_tick = Instant::now();
+                    if self.life_game.step().is_none() {
+                        break;
+                    }
                 }
             }
         }
@@ -163,7 +160,7 @@ impl<'a> App<'a> {
             Rect {
                 x: self.setting.x,
                 y: self.setting.y,
-                width: game.width() as u16 * width,
+                width: game.width() * width,
                 height: title_height,
             },
         );
