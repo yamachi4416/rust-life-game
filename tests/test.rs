@@ -50,6 +50,8 @@ fn test_key_move_navigation() {
 
     insta::assert_snapshot!(app.press('l'));
     insta::assert_snapshot!(app.press('j'));
+    insta::assert_snapshot!(app.press('h'));
+    insta::assert_snapshot!(app.press('k'));
 
     assert!(app.quit());
 }
