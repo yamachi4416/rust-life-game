@@ -20,8 +20,22 @@ impl AppController {
             return AppAction::None;
         }
 
+        if state.dialog.is_open {
+            match key.code {
+                KeyCode::Char('?') | KeyCode::Char('q') | KeyCode::Esc => {
+                    state.dialog.close();
+                }
+                _ => {}
+            }
+            return AppAction::None;
+        }
+
         match key.code {
             KeyCode::Char('q') => AppAction::Quit,
+            KeyCode::Char('?') => {
+                self.open_help(state);
+                AppAction::None
+            }
             KeyCode::Char('n') => {
                 state.reset_tick();
                 AppAction::Next
@@ -60,5 +74,20 @@ impl AppController {
             }
             _ => AppAction::None,
         }
+    }
+
+    fn open_help(&self, state: &mut AppState) {
+        state.dialog.open(
+            "Help (? / q / Esc: Close)",
+            vec![
+                ("h, j, k, l / Arrow", "Move view"),
+                ("+ / -", "Zoom size"),
+                ("c", "Change color"),
+                ("Space", "Step forward"),
+                ("n", "Next pattern"),
+                ("? / Esc", "Toggle / Close"),
+                ("q", "Quit"),
+            ],
+        );
     }
 }

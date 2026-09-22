@@ -4,11 +4,11 @@ mod widgets;
 use std::error::Error;
 
 use crossterm::event::{self, Event};
-use ratatui::{DefaultTerminal, Frame};
+use ratatui::DefaultTerminal;
 use rust_life_game::LifeGame;
 
 use self::control::{AppAction, AppController};
-use self::widgets::{AppState, Draw, LifeGameWidget};
+use self::widgets::{AppState, Draw, HelpWidget, LifeGameWidget};
 
 pub struct App<'a> {
     state: AppState,
@@ -23,7 +23,7 @@ impl<'a> App<'a> {
             state: AppState::new(),
             controller: AppController::new(),
             inputs,
-            widgets: vec![Box::new(LifeGameWidget::new())],
+            widgets: vec![Box::new(LifeGameWidget::new()), Box::new(HelpWidget::new())],
         }
     }
 
@@ -34,7 +34,11 @@ impl<'a> App<'a> {
             self.state.life_game.life_game = LifeGame::from(name, input);
 
             loop {
-                terminal.draw(|frame| self.draw(frame))?;
+                terminal.draw(|frame| {
+                    for widget in &self.widgets {
+                        widget.draw(frame, &self.state);
+                    }
+                })?;
 
                 if event::poll(self.state.timeout())? {
                     if let Event::Key(key) = event::read()? {
@@ -56,11 +60,5 @@ impl<'a> App<'a> {
         }
 
         Ok(())
-    }
-
-    fn draw(&self, frame: &mut Frame) {
-        for widget in &self.widgets {
-            widget.draw(frame, &self.state);
-        }
     }
 }

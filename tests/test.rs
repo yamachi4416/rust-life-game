@@ -64,3 +64,13 @@ fn test_key_space_step() {
 
     assert!(app.quit());
 }
+
+#[test]
+fn test_help_dialog() {
+    let mut app = Command::start();
+
+    insta::assert_snapshot!(app.press('?'));
+    insta::assert_snapshot!(app.press('\x1b'));
+
+    assert!(app.quit());
+}

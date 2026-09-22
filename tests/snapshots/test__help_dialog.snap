@@ -1,0 +1,21 @@
+---
+source: tests/test.rs
+expression: "app.press('?')"
+---
+0000OCTAGON00000                                                                
+      0000                                                                      
+    00    00                                                                    
+  00        00                                                                  
+00            00                                                                
+00            00                                                                
+  00        00                                                                  
+    00    00                                                                    
+      0000          ┌ Help (? / q / Esc: Close) ──────────┐                     
+                    │ h, j, k, l / Arrow | Move view      │                     
+                    │ + / -              | Zoom size      │                     
+                    │ c                  | Change color   │                     
+                    │ Space              | Step forward   │                     
+                    │ n                  | Next pattern   │                     
+                    │ ? / Esc            | Toggle / Close │                     
+                    │ q                  | Quit           │                     
+                    └─────────────────────────────────────┘

@@ -1,13 +1,16 @@
+mod help_widget;
 mod life_game_widget;
 
 use std::time::{Duration, Instant};
 
 use ratatui::Frame;
 
+pub use help_widget::{HelpWidget, HelpWidgetState};
 pub use life_game_widget::{LifeGameWidget, LifeGameWidgetState};
 
 pub struct AppState {
     pub life_game: LifeGameWidgetState,
+    pub dialog: HelpWidgetState,
     pub last_tick: Instant,
     pub tick_rate: Duration,
 }
@@ -16,6 +19,7 @@ impl AppState {
     pub fn new() -> Self {
         Self {
             life_game: LifeGameWidgetState::new(),
+            dialog: HelpWidgetState::new(),
             last_tick: Instant::now(),
             tick_rate: Duration::from_secs(1),
         }
