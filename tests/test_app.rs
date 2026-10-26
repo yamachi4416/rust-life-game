@@ -1,5 +1,6 @@
 use portable_pty::{Child, CommandBuilder, NativePtySystem, PtySize, PtySystem};
 use std::io::{Read, Write};
+use std::num::NonZero;
 use std::sync::{Arc, Mutex};
 use std::thread::{self, sleep};
 use std::time::Duration;
@@ -26,7 +27,11 @@ impl Command {
         let app = Self {
             child: pty.slave.spawn_command(cmd).unwrap(),
             writer: pty.master.take_writer().unwrap(),
-            parser: Arc::new(Mutex::new(vt100::Parser::new(25, 80, 0))),
+            parser: Arc::new(Mutex::new(vt100::Parser::new(
+                NonZero::new(25).unwrap(),
+                NonZero::new(80).unwrap(),
+                0,
+            ))),
         };
 
         let processor = Arc::clone(&app.parser);
@@ -49,8 +54,8 @@ impl Command {
         let (rows, cols) = screen.size();
 
         let mut out = String::new();
-        for r in 0..rows {
-            for c in 0..cols {
+        for r in 0..rows.into() {
+            for c in 0..cols.into() {
                 let cell = screen.cell(r, c).unwrap();
                 out.push_str(&match cell.contents() {
                     "" | " " => match cell.bgcolor() {
